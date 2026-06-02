@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>オートバイ選び支援</title>
+    <link rel="stylesheet" href="./src/styles.css">
+  </head>
+  <body>
+    <header>
+      <h1>オートバイ選び支援</h1>
+      <p>身体情報・経験・好みをもとに、扱いやすい車種を絞り込むプロトタイプ。</p>
+    </header>
+
+    <main>
+      <section class="panel controls">
+        <h2>条件入力</h2>
+        <form id="advisor-form">
+          <fieldset>
+            <legend>利用者情報</legend>
+            <label>
+              名前
+              <input name="name" value="Aさん" autocomplete="name">
+            </label>
+            <div class="inline-grid">
+              <label>
+                年齢
+                <input name="age" type="number" min="16" max="90" value="24">
+              </label>
+              <label>
+                性別
+                <select name="gender">
+                  <option value="male">男性</option>
+                  <option value="female">女性</option>
+                </select>
+              </label>
+            </div>
+            <div class="inline-grid">
+              <label>
+                身長(cm)
+                <input name="heightCm" type="number" min="120" max="220" value="179">
+              </label>
+              <label>
+                体重(kg)
+                <input name="weightKg" type="number" min="30" max="180" value="73">
+              </label>
+            </div>
+            <label>
+              運動経験
+              <select name="exercise">
+                <option value="veryLow">ほとんどない</option>
+                <option value="low">少ない</option>
+                <option value="normal" selected>普通</option>
+                <option value="high">運動している</option>
+                <option value="veryHigh">かなり強い</option>
+              </select>
+            </label>
+            <label>
+              搭乗経験
+              <select name="riding">
+                <option value="veryLow">初めて</option>
+                <option value="low" selected>久々に乗る</option>
+                <option value="normal">普通</option>
+                <option value="high">自信がある</option>
+                <option value="veryHigh">かなり自信がある</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>好み</legend>
+            <label>
+              メーカー
+              <select name="maker">
+                <option value="any">指定なし</option>
+                <option value="ホンダ" selected>ホンダ</option>
+                <option value="スズキ">スズキ</option>
+                <option value="ヤマハ">ヤマハ</option>
+                <option value="カワサキ">カワサキ</option>
+              </select>
+            </label>
+            <label>
+              トランスミッション
+              <select name="gear">
+                <option value="any">指定なし</option>
+                <option value="1" selected>MT</option>
+                <option value="2">AT</option>
+              </select>
+            </label>
+            <label>
+              排気量上限
+              <select name="displacementMax">
+                <option value="1">50cc以下</option>
+                <option value="2">125cc以下</option>
+                <option value="3">250cc以下</option>
+                <option value="4">400cc以下</option>
+                <option value="5">750cc以下</option>
+                <option value="6">1000cc以下</option>
+                <option value="7" selected>無制限</option>
+              </select>
+            </label>
+            <p class="metric-label">タイプ</p>
+            <div class="checkbox-grid">
+              <label><input type="checkbox" name="genres" value="1">スクーター</label>
+              <label><input type="checkbox" name="genres" value="2" checked>アメリカン</label>
+              <label><input type="checkbox" name="genres" value="3" checked>ネイキッド</label>
+              <label><input type="checkbox" name="genres" value="4" checked>スポーツ</label>
+              <label><input type="checkbox" name="genres" value="5" checked>オフロード</label>
+              <label><input type="checkbox" name="genres" value="6" checked>ツアラー</label>
+            </div>
+            <div class="inline-grid">
+              <label>
+                積載性
+                <select name="loadingMin">
+                  <option value="1">問わない</option>
+                  <option value="2">やや必要</option>
+                  <option value="3" selected>普通以上</option>
+                  <option value="4">多い</option>
+                </select>
+              </label>
+              <label>
+                燃費
+                <select name="fuelMin">
+                  <option value="1">問わない</option>
+                  <option value="2">やや良い</option>
+                  <option value="3" selected>普通以上</option>
+                  <option value="4">良い</option>
+                  <option value="5">とても良い</option>
+                </select>
+              </label>
+            </div>
+          </fieldset>
+
+          <button type="submit">おすすめを表示</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>診断結果</h2>
+        <div id="result-summary" class="summary" aria-live="polite"></div>
+        <p id="empty-state" class="empty" hidden>条件に合う車種がありません。メーカー、積載性、燃費、タイプの条件を緩めてください。</p>
+        <div id="result-list" class="result-list"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
