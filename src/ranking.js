@@ -35,13 +35,13 @@ export const ridingMultipliers = {
   veryLow: 0.7,
   low: 0.85,
   normal: 1,
-  high: 1.1,
+  high: 1.25,
   veryHigh: 1.4
 };
 
 export const genderMultipliers = {
   male: 1,
-  female: 0.88
+  female: 0.85
 };
 
 export function getBaseScore(age) {
@@ -65,26 +65,26 @@ export function calculateRohrerIndex(heightCm, weightKg) {
 }
 
 export function getRohrerMultiplier(rohrerIndex) {
-  if (rohrerIndex < 100 || rohrerIndex >= 160) return 0.8;
-  if (rohrerIndex < 115 || rohrerIndex >= 145) return 0.9;
+  if (rohrerIndex <= 100 || rohrerIndex > 160) return 0.8;
+  if (rohrerIndex <= 116 || rohrerIndex > 145) return 0.9;
   return 1;
 }
 
 export function getHeightRank(heightCm) {
   const height = Number(heightCm);
-  if (height >= 176) return 5;
-  if (height >= 170) return 4;
-  if (height >= 165) return 3;
-  if (height >= 161) return 2;
+  if (height > 176) return 5;
+  if (height > 170) return 4;
+  if (height > 165) return 3;
+  if (height > 160) return 2;
   return 1;
 }
 
 export function getRiderRank(score) {
-  if (score >= 70) return "A";
-  if (score >= 52) return "B";
-  if (score >= 46) return "C";
-  if (score >= 38) return "D";
-  if (score >= 31) return "E";
+  if (score > 70) return "A";
+  if (score > 52) return "B";
+  if (score > 46) return "C";
+  if (score > 42) return "D";
+  if (score > 30) return "E";
   return "F";
 }
 
@@ -95,18 +95,21 @@ export function calculateRiderProfile(input) {
   const genderMultiplier = genderMultipliers[input.gender] ?? 1;
   const exerciseMultiplier = exerciseMultipliers[input.exercise] ?? 1;
   const ridingMultiplier = ridingMultipliers[input.riding] ?? 1;
-  const score = baseScore * genderMultiplier * rohrerMultiplier * exerciseMultiplier * ridingMultiplier;
+  const heightRank = getHeightRank(input.heightCm);
+  const bodyExperienceScore = baseScore * rohrerMultiplier * exerciseMultiplier * ridingMultiplier;
+  const score = (bodyExperienceScore + heightRank) * genderMultiplier;
 
   return {
     baseScore,
+    bodyExperienceScore,
     rohrerIndex,
     genderMultiplier,
     rohrerMultiplier,
     exerciseMultiplier,
     ridingMultiplier,
+    heightRank,
     score,
-    riderRank: getRiderRank(score),
-    heightRank: getHeightRank(input.heightCm)
+    riderRank: getRiderRank(score)
   };
 }
 

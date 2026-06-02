@@ -1,11 +1,20 @@
 import { bikes } from "../data/bikes.js";
-import { calculateRiderProfile } from "./ranking.js";
+import { calculateRiderProfile, rankScore } from "./ranking.js";
 import { labels, recommendBikes } from "./recommendation.js";
 
 const form = document.querySelector("#advisor-form");
 const resultSummary = document.querySelector("#result-summary");
 const resultList = document.querySelector("#result-list");
 const emptyState = document.querySelector("#empty-state");
+const rankTrack = document.querySelector("#rank-track");
+const sortOrder = document.querySelector("#sort-order");
+
+form.addEventListener("input", render);
+form.addEventListener("change", render);
+form.addEventListener("reset", () => {
+  requestAnimationFrame(render);
+});
+sortOrder.addEventListener("change", render);
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -32,60 +41,115 @@ function render() {
     loadingMin: formData.get("loadingMin"),
     fuelMin: formData.get("fuelMin")
   };
-  const recommendations = recommendBikes(bikes, riderProfile, preferences);
+  const recommendations = sortRecommendations(
+    recommendBikes(bikes, riderProfile, preferences),
+    riderProfile,
+    sortOrder.value
+  );
 
   renderSummary(riderProfile, recommendations.length);
-  renderResults(recommendations);
+  renderRankTrack(riderProfile);
+  renderResults(recommendations, riderProfile);
 }
 
 function renderSummary(profile, count) {
+  const scorePercent = Math.min(100, Math.max(0, (profile.score / 80) * 100));
   resultSummary.innerHTML = `
-    <div>
+    <div class="metric primary">
       <span class="metric-label">ライダーランク</span>
       <strong>${profile.riderRank}</strong>
+      <span class="metric-note">総合スコア ${profile.score.toFixed(2)}</span>
     </div>
-    <div>
+    <div class="metric">
       <span class="metric-label">身長ランク</span>
       <strong>${profile.heightRank}</strong>
+      <span class="metric-note">足つき補正 +${profile.heightRank}</span>
     </div>
-    <div>
-      <span class="metric-label">算出スコア</span>
-      <strong>${profile.score.toFixed(2)}</strong>
+    <div class="metric wide">
+      <span class="metric-label">身体・経験スコア</span>
+      <strong>${profile.bodyExperienceScore.toFixed(2)}</strong>
+      <span class="meter"><span style="width: ${scorePercent}%"></span></span>
     </div>
-    <div>
+    <div class="metric">
       <span class="metric-label">ローレル指数</span>
       <strong>${profile.rohrerIndex.toFixed(1)}</strong>
+      <span class="metric-note">補正 ${profile.rohrerMultiplier}</span>
     </div>
-    <div>
+    <div class="metric">
       <span class="metric-label">候補数</span>
       <strong>${count}</strong>
+      <span class="metric-note">全${bikes.length}車種から抽出</span>
     </div>
   `;
 }
 
-function renderResults(recommendations) {
+function renderRankTrack(profile) {
+  const ranks = ["F", "E", "D", "C", "B", "A"];
+  rankTrack.innerHTML = ranks
+    .map((rank) => {
+      const active = rankScore[rank] <= rankScore[profile.riderRank] ? "active" : "";
+      const current = rank === profile.riderRank ? "current" : "";
+      return `<span class="${active} ${current}">${rank}</span>`;
+    })
+    .join("");
+}
+
+function renderResults(recommendations, riderProfile) {
   resultList.innerHTML = "";
   emptyState.hidden = recommendations.length > 0;
 
   for (const bike of recommendations) {
+    const fitScore = calculateFitScore(bike, riderProfile);
+    const fitPercent = Math.min(100, Math.max(8, fitScore));
+    const safetyMargin = rankScore[riderProfile.riderRank] - rankScore[bike.rank];
     const item = document.createElement("article");
     item.className = "bike-card";
     item.innerHTML = `
-      <div>
-        <p class="maker">${bike.maker}</p>
-        <h3>${bike.name}</h3>
+      <div class="bike-card-head">
+        <div>
+          <p class="maker">${bike.maker}</p>
+          <h3>${bike.name}</h3>
+        </div>
+        <span class="rank-badge rank-${bike.rank}">${bike.rank}</span>
+      </div>
+      <div class="fit-row">
+        <span>相性</span>
+        <div class="fit-bar"><span style="width: ${fitPercent}%"></span></div>
+        <strong>${fitScore}</strong>
       </div>
       <dl>
-        <div><dt>車種ランク</dt><dd>${bike.rank}</dd></div>
         <div><dt>難易度</dt><dd>${bike.diff}</dd></div>
+        <div><dt>余裕</dt><dd>${safetyMargin >= 0 ? `+${safetyMargin}` : safetyMargin}</dd></div>
         <div><dt>ギア</dt><dd>${labels.gear[bike.gear]}</dd></div>
         <div><dt>排気量</dt><dd>${labels.displacement[bike.displacement]}</dd></div>
         <div><dt>タイプ</dt><dd>${labels.genre[bike.genre]}</dd></div>
         <div><dt>積載</dt><dd>${labels.loading[bike.loading]}</dd></div>
         <div><dt>燃費</dt><dd>${labels.fuel[bike.fuel]}</dd></div>
+        <div><dt>風防</dt><dd>${labels.wind[bike.wind]}</dd></div>
         <div><dt>シート高</dt><dd>${bike.sheet}</dd></div>
       </dl>
     `;
     resultList.append(item);
   }
+}
+
+function sortRecommendations(recommendations, riderProfile, order) {
+  const sorted = [...recommendations];
+  if (order === "fuel") {
+    return sorted.sort((a, b) => b.fuel - a.fuel || calculateFitScore(b, riderProfile) - calculateFitScore(a, riderProfile));
+  }
+  if (order === "displacement") {
+    return sorted.sort((a, b) => b.displacement - a.displacement || calculateFitScore(b, riderProfile) - calculateFitScore(a, riderProfile));
+  }
+  if (order === "difficulty") {
+    return sorted.sort((a, b) => b.diff - a.diff || b.fuel - a.fuel);
+  }
+  return sorted.sort((a, b) => calculateFitScore(b, riderProfile) - calculateFitScore(a, riderProfile) || b.fuel - a.fuel);
+}
+
+function calculateFitScore(bike, riderProfile) {
+  const rankMargin = rankScore[riderProfile.riderRank] - rankScore[bike.rank];
+  const heightMargin = riderProfile.heightRank - bike.sheet;
+  const difficultyBalance = Math.max(0, 24 - bike.diff);
+  return Math.round(45 + rankMargin * 12 + heightMargin * 7 + bike.fuel * 3 + bike.loading * 2 + difficultyBalance);
 }

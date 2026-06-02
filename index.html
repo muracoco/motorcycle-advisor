@@ -7,14 +7,23 @@
     <link rel="stylesheet" href="./src/styles.css">
   </head>
   <body>
-    <header>
-      <h1>オートバイ選び支援</h1>
-      <p>身体情報・経験・好みをもとに、扱いやすい車種を絞り込むプロトタイプ。</p>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Motorcycle Advisor</p>
+        <h1>身体情報から、扱いやすい一台を絞り込む。</h1>
+        <p>ライダーランク・足つき・好みをリアルタイムに反映し、扱いやすい候補だけを表示します。</p>
+      </div>
+      <div class="hero-meter" aria-hidden="true">
+        <span>F</span><span>E</span><span>D</span><span>C</span><span>B</span><span>A</span>
+      </div>
     </header>
 
     <main>
       <section class="panel controls">
-        <h2>条件入力</h2>
+        <div class="section-title">
+          <h2>ライダー条件</h2>
+          <p>入力すると即時に候補が更新されます。</p>
+        </div>
         <form id="advisor-form">
           <fieldset>
             <legend>利用者情報</legend>
@@ -131,13 +140,28 @@
             </div>
           </fieldset>
 
-          <button type="submit">おすすめを表示</button>
+          <button type="reset">初期値に戻す</button>
         </form>
       </section>
 
-      <section class="panel">
-        <h2>診断結果</h2>
+      <section class="panel results-panel">
+        <div class="results-head">
+          <div class="section-title">
+            <h2>診断結果</h2>
+            <p>ランク・足つき・好みをすべて満たす車種だけを表示します。</p>
+          </div>
+          <label class="sort-control">
+            並び替え
+            <select id="sort-order">
+              <option value="fit">相性が高い順</option>
+              <option value="difficulty">難しい順</option>
+              <option value="fuel">燃費が良い順</option>
+              <option value="displacement">排気量が大きい順</option>
+            </select>
+          </label>
+        </div>
         <div id="result-summary" class="summary" aria-live="polite"></div>
+        <div id="rank-track" class="rank-track" aria-label="ライダーランク表示"></div>
         <p id="empty-state" class="empty" hidden>条件に合う車種がありません。メーカー、積載性、燃費、タイプの条件を緩めてください。</p>
         <div id="result-list" class="result-list"></div>
       </section>
