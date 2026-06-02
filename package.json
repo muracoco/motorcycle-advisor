@@ -1,0 +1,11 @@
+{
+  "name": "motorcycle-advisor",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Static web prototype for motorcycle recommendation based on rider profile and preferences.",
+  "scripts": {
+    "test": "node tests/logic.test.mjs"
+  },
+  "license": "MIT"
+}
