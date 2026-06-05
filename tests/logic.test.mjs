@@ -8,7 +8,7 @@ import {
   getRiderRank,
   getRohrerMultiplier
 } from "../src/ranking.js";
-import { recommendBikes } from "../src/recommendation.js";
+import { buildRecommendationReasons, recommendBikes } from "../src/recommendation.js";
 
 for (const [height, expectedRank] of [
   [160, 1],
@@ -143,6 +143,20 @@ assert.deepEqual(
     "シャドウ750",
     "モンキー"
   ]
+);
+
+assert.ok(recommendations.every((bike) => Array.isArray(bike.reasons)));
+assert.ok(recommendations.every((bike) => bike.reasons.length > 0));
+assert.deepEqual(
+  buildRecommendationReasons(recommendations[0], profile, {
+    maker: "ホンダ",
+    gear: "1",
+    displacementMax: "7",
+    genres: ["2", "3", "4", "5", "6"],
+    loadingMin: "1",
+    fuelMin: "1"
+  }).slice(0, 2),
+  ["車種ランクCでライダーランクC以内", "シート高ランク3が身長ランク5以内"]
 );
 
 const strictRecommendations = recommendBikes(bikes, profile, {

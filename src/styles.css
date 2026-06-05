@@ -404,6 +404,30 @@ button:hover {
   font-weight: 800;
 }
 
+.reason-block {
+  margin: 12px 0;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 10px;
+  background: #eff6ff;
+}
+
+.reason-block p {
+  margin: 0 0 6px;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.reason-block ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  color: #1e3a8a;
+  font-size: 12px;
+}
+
 dl {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

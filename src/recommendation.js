@@ -51,11 +51,48 @@ export function recommendBikes(bikes, riderProfile, preferences) {
     .filter((bike) => matchesPreferences(bike, preferences))
     .filter((bike) => rankScore[bike.rank] <= rankScore[riderProfile.riderRank])
     .filter((bike) => bike.sheet <= riderProfile.heightRank)
+    .map((bike) => ({
+      ...bike,
+      reasons: buildRecommendationReasons(bike, riderProfile, preferences)
+    }))
     .sort((a, b) => {
       const rankDiff = rankScore[b.rank] - rankScore[a.rank];
       if (rankDiff !== 0) return rankDiff;
       return b.fuel - a.fuel;
     });
+}
+
+export function buildRecommendationReasons(bike, riderProfile, preferences) {
+  const reasons = [];
+  const rankMargin = rankScore[riderProfile.riderRank] - rankScore[bike.rank];
+  const heightMargin = riderProfile.heightRank - bike.sheet;
+
+  reasons.push(`車種ランク${bike.rank}でライダーランク${riderProfile.riderRank}以内`);
+  reasons.push(`シート高ランク${bike.sheet}が身長ランク${riderProfile.heightRank}以内`);
+
+  if (preferences.maker !== "any") {
+    reasons.push(`${bike.maker}を選択`);
+  }
+  if (preferences.gear !== "any") {
+    reasons.push(`${labels.gear[bike.gear]}条件に一致`);
+  }
+
+  reasons.push(`${labels.displacement[bike.displacement]}が排気量上限内`);
+
+  if (Number(preferences.loadingMin) > 1) {
+    reasons.push(`積載性が${labels.loading[bike.loading]}`);
+  }
+  if (Number(preferences.fuelMin) > 1) {
+    reasons.push(`燃費が${labels.fuel[bike.fuel]}`);
+  }
+  if (rankMargin > 0) {
+    reasons.push(`ランク余裕 +${rankMargin}`);
+  }
+  if (heightMargin > 0) {
+    reasons.push(`足つき余裕 +${heightMargin}`);
+  }
+
+  return reasons.slice(0, 5);
 }
 
 function matchesPreferences(bike, preferences) {

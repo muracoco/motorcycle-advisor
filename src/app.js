@@ -117,6 +117,12 @@ function renderResults(recommendations, riderProfile) {
         <div class="fit-bar"><span style="width: ${fitPercent}%"></span></div>
         <strong>${fitScore}</strong>
       </div>
+      <div class="reason-block">
+        <p>推薦理由</p>
+        <ul>
+          ${bike.reasons.map((reason) => `<li>${reason}</li>`).join("")}
+        </ul>
+      </div>
       <dl>
         <div><dt>難易度</dt><dd>${bike.diff}</dd></div>
         <div><dt>余裕</dt><dd>${safetyMargin >= 0 ? `+${safetyMargin}` : safetyMargin}</dd></div>
