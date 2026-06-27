@@ -8,7 +8,21 @@ import {
   getRiderRank,
   getRohrerMultiplier
 } from "../src/ranking.js";
-import { buildRecommendationReasons, recommendBikes } from "../src/recommendation.js";
+import { buildRecommendationReasons, labels, recommendBikes } from "../src/recommendation.js";
+
+const bikeIds = new Set();
+for (const bike of bikes) {
+  assert.ok(!bikeIds.has(bike.id), `duplicate bike id ${bike.id}`);
+  bikeIds.add(bike.id);
+  assert.equal(enrichBike(bike).diff, bike.power + bike.weight + bike.sheet + bike.style);
+  assert.equal(enrichBike(bike).rank, getBikeRank(enrichBike(bike).diff));
+  assert.ok(labels.gear[bike.gear], `missing gear label for ${bike.name}`);
+  assert.ok(labels.displacement[bike.displacement], `missing displacement label for ${bike.name}`);
+  assert.ok(labels.genre[bike.genre], `missing genre label for ${bike.name}`);
+  assert.ok(labels.loading[bike.loading], `missing loading label for ${bike.name}`);
+  assert.ok(labels.fuel[bike.fuel], `missing fuel label for ${bike.name}`);
+  assert.ok(labels.wind[bike.wind], `missing wind label for ${bike.name}`);
+}
 
 for (const [height, expectedRank] of [
   [160, 1],
