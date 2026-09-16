@@ -10,8 +10,8 @@
     <header class="hero">
       <div>
         <p class="eyebrow">Motorcycle Advisor</p>
-        <h1>身体情報から、扱いやすい一台を絞り込む。</h1>
-        <p>ライダーランク・足つき・好みをリアルタイムに反映し、扱いやすい候補だけを表示します。</p>
+        <h1>オートバイ選びの候補を絞り込む。</h1>
+        <p>身体情報・経験・好みをもとに、仮の評価ルールで候補を表示する試作ツールです。</p>
       </div>
       <div class="hero-meter" aria-hidden="true">
         <span>F</span><span>E</span><span>D</span><span>C</span><span>B</span><span>A</span>
@@ -34,7 +34,7 @@
             <div class="inline-grid">
               <label>
                 年齢
-                <input name="age" type="number" min="16" max="90" value="24">
+                <input name="age" type="number" min="16" max="90" value="24" required aria-describedby="input-status">
               </label>
               <label>
                 性別
@@ -47,13 +47,14 @@
             <div class="inline-grid">
               <label>
                 身長(cm)
-                <input name="heightCm" type="number" min="120" max="220" value="179">
+                <input name="heightCm" type="number" min="120" max="220" value="179" required aria-describedby="input-status">
               </label>
               <label>
                 体重(kg)
-                <input name="weightKg" type="number" min="30" max="180" value="73">
+                <input name="weightKg" type="number" min="30" max="180" value="73" required aria-describedby="input-status">
               </label>
             </div>
+            <p id="input-status" class="empty" role="status" hidden></p>
             <label>
               運動経験
               <select name="exercise">
@@ -147,14 +148,14 @@
       <section class="panel results-panel">
         <div class="results-head">
           <div class="section-title">
-            <h2>診断結果</h2>
-            <p>ランク・足つき・好みをすべて満たす車種だけを表示します。</p>
+            <h2>候補一覧</h2>
+            <p>ランクとスコアは仮ルールによる目安です。実際の足つき・適合性・安全性を示すものではありません。</p>
           </div>
           <label class="sort-control">
             並び替え
             <select id="sort-order">
-              <option value="fit">相性が高い順</option>
-              <option value="difficulty">難しい順</option>
+              <option value="fit">目安スコアが高い順</option>
+              <option value="difficulty">難易度指数が高い順</option>
               <option value="fuel">燃費が良い順</option>
               <option value="displacement">排気量が大きい順</option>
             </select>

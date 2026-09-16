@@ -86,10 +86,10 @@ export function buildRecommendationReasons(bike, riderProfile, preferences) {
     reasons.push(`燃費が${labels.fuel[bike.fuel]}`);
   }
   if (rankMargin > 0) {
-    reasons.push(`ランク余裕 +${rankMargin}`);
+    reasons.push(`ランク差 +${rankMargin}`);
   }
   if (heightMargin > 0) {
-    reasons.push(`足つき余裕 +${heightMargin}`);
+    reasons.push(`身長・シート高ランク差 +${heightMargin}`);
   }
 
   return reasons.slice(0, 5);

@@ -10,10 +10,40 @@ import {
 } from "../src/ranking.js";
 import { buildRecommendationReasons, labels, recommendBikes } from "../src/recommendation.js";
 
+const numericRanges = {
+  gear: [1, 2],
+  displacement: [1, 7],
+  power: [1, 10],
+  weight: [1, 5],
+  genre: [1, 6],
+  loading: [1, 5],
+  sheet: [1, 5],
+  style: [1, 5],
+  fuel: [1, 5],
+  wind: [1, 5]
+};
 const bikeIds = new Set();
+const bikeNames = new Set();
 for (const bike of bikes) {
+  assert.ok(Number.isSafeInteger(bike.id) && bike.id > 0, `invalid bike id ${bike.id}`);
   assert.ok(!bikeIds.has(bike.id), `duplicate bike id ${bike.id}`);
   bikeIds.add(bike.id);
+
+  for (const field of ["name", "maker"]) {
+    assert.equal(typeof bike[field], "string", `bike ${bike.id}: ${field} must be a string`);
+    assert.ok(bike[field].trim().length > 0, `bike ${bike.id}: ${field} is required`);
+    assert.equal(bike[field], bike[field].trim(), `bike ${bike.id}: ${field} has surrounding whitespace`);
+  }
+  assert.ok(["ホンダ", "スズキ", "ヤマハ", "カワサキ"].includes(bike.maker), `invalid maker for ${bike.name}`);
+  const bikeName = JSON.stringify([bike.maker, bike.name]);
+  assert.ok(!bikeNames.has(bikeName), `duplicate maker/name ${bikeName}`);
+  bikeNames.add(bikeName);
+
+  assert.ok([1, 2, 3, 4, 6].includes(bike.cylinder), `invalid cylinder for ${bike.name}`);
+  for (const [field, [min, max]] of Object.entries(numericRanges)) {
+    assert.ok(Number.isInteger(bike[field]), `${bike.name}: ${field} must be an integer`);
+    assert.ok(bike[field] >= min && bike[field] <= max, `${bike.name}: ${field} must be ${min}..${max}`);
+  }
   assert.equal(enrichBike(bike).diff, bike.power + bike.weight + bike.sheet + bike.style);
   assert.equal(enrichBike(bike).rank, getBikeRank(enrichBike(bike).diff));
   assert.ok(labels.gear[bike.gear], `missing gear label for ${bike.name}`);

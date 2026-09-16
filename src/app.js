@@ -3,6 +3,7 @@ import { calculateRiderProfile, rankScore } from "./ranking.js";
 import { labels, recommendBikes } from "./recommendation.js";
 
 const form = document.querySelector("#advisor-form");
+const inputStatus = document.querySelector("#input-status");
 const resultSummary = document.querySelector("#result-summary");
 const resultList = document.querySelector("#result-list");
 const emptyState = document.querySelector("#empty-state");
@@ -24,6 +25,19 @@ form.addEventListener("submit", (event) => {
 render();
 
 function render() {
+  if (!form.checkValidity()) {
+    const invalidInput = form.querySelector("input:invalid");
+    inputStatus.textContent = `${invalidInput.labels[0].textContent.trim()}は${invalidInput.min}～${invalidInput.max}の整数で入力してください。`;
+    inputStatus.hidden = false;
+    resultSummary.replaceChildren();
+    rankTrack.replaceChildren();
+    resultList.replaceChildren();
+    emptyState.hidden = true;
+    return;
+  }
+  inputStatus.textContent = "";
+  inputStatus.hidden = true;
+
   const formData = new FormData(form);
   const riderProfile = calculateRiderProfile({
     age: formData.get("age"),
@@ -63,7 +77,7 @@ function renderSummary(profile, count) {
     <div class="metric">
       <span class="metric-label">身長ランク</span>
       <strong>${profile.heightRank}</strong>
-      <span class="metric-note">足つき補正 +${profile.heightRank}</span>
+      <span class="metric-note">身長による加点 +${profile.heightRank}</span>
     </div>
     <div class="metric wide">
       <span class="metric-label">身体・経験スコア</span>
@@ -101,7 +115,7 @@ function renderResults(recommendations, riderProfile) {
   for (const bike of recommendations) {
     const fitScore = calculateFitScore(bike, riderProfile);
     const fitPercent = Math.min(100, Math.max(8, fitScore));
-    const safetyMargin = rankScore[riderProfile.riderRank] - rankScore[bike.rank];
+    const rankMargin = rankScore[riderProfile.riderRank] - rankScore[bike.rank];
     const item = document.createElement("article");
     item.className = "bike-card";
     item.innerHTML = `
@@ -113,26 +127,26 @@ function renderResults(recommendations, riderProfile) {
         <span class="rank-badge rank-${bike.rank}">${bike.rank}</span>
       </div>
       <div class="fit-row">
-        <span>相性</span>
+        <span>目安スコア</span>
         <div class="fit-bar"><span style="width: ${fitPercent}%"></span></div>
         <strong>${fitScore}</strong>
       </div>
       <div class="reason-block">
-        <p>推薦理由</p>
+        <p>条件との一致</p>
         <ul>
           ${bike.reasons.map((reason) => `<li>${reason}</li>`).join("")}
         </ul>
       </div>
       <dl>
-        <div><dt>難易度</dt><dd>${bike.diff}</dd></div>
-        <div><dt>余裕</dt><dd>${safetyMargin >= 0 ? `+${safetyMargin}` : safetyMargin}</dd></div>
+        <div><dt>難易度指数</dt><dd>${bike.diff}</dd></div>
+        <div><dt>ランク差</dt><dd>${rankMargin >= 0 ? `+${rankMargin}` : rankMargin}</dd></div>
         <div><dt>ギア</dt><dd>${labels.gear[bike.gear]}</dd></div>
         <div><dt>排気量</dt><dd>${labels.displacement[bike.displacement]}</dd></div>
         <div><dt>タイプ</dt><dd>${labels.genre[bike.genre]}</dd></div>
         <div><dt>積載</dt><dd>${labels.loading[bike.loading]}</dd></div>
         <div><dt>燃費</dt><dd>${labels.fuel[bike.fuel]}</dd></div>
         <div><dt>風防</dt><dd>${labels.wind[bike.wind]}</dd></div>
-        <div><dt>シート高</dt><dd>${bike.sheet}</dd></div>
+        <div><dt>シート高ランク</dt><dd>${bike.sheet}</dd></div>
       </dl>
     `;
     resultList.append(item);
